@@ -1,5 +1,6 @@
 use crate::pipeline::math::vec3::Vec3;
 
+#[derive(Debug, Clone, PartialEq)]
 pub struct Model {
     vertices: Vec<Vec3>,
     indices: Vec<[u64; 3]>,
