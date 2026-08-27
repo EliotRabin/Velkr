@@ -1,12 +1,72 @@
-use crate::pipeline::geometry::vec3::Vec3;
+use crate::pipeline::math::vec3::Vec3;
 
 pub struct Model {
     vertices: Vec<Vec3>,
+    indices: Vec<[u64; 3]>,
+    location: Vec3,
+    rotation: Vec3,
+    scale: Vec3,
 }
 
 impl Model {
-    pub fn new(vertices: Vec<Vec3>) -> Self {
-        Model { vertices }
+    pub fn new(vertices: Vec<Vec3>, indices: Vec<[u64; 3]>, location: Vec3, rotation: Vec3, scale: Vec3) -> Self {
+        Model { vertices, indices, location, rotation, scale }
+    }
+
+    pub fn cube(size: f64) -> Self {
+        let half_size = size / 2.0;
+        let vertices = vec![
+            Vec3::new(-half_size, -half_size, -half_size),
+            Vec3::new(half_size, -half_size, -half_size),
+            Vec3::new(half_size, half_size, -half_size),
+            Vec3::new(-half_size, half_size, -half_size),
+            Vec3::new(-half_size, -half_size, half_size),
+            Vec3::new(half_size, -half_size, half_size),
+            Vec3::new(half_size, half_size, half_size),
+            Vec3::new(-half_size, half_size, half_size),
+        ];
+
+        let indices = vec![
+            [0, 1, 2], [0, 2, 3], // back face
+            [4, 5, 6], [4, 6, 7], // front face
+            [0, 1, 5], [0, 5, 4], // bottom face
+            [2, 3, 7], [2, 7, 6], // top face
+            [0, 3, 7], [0, 7, 4], // left face
+            [1, 2, 6], [1, 6, 5], // right face
+        ];
+
+        Model { vertices, indices, location: Vec3::new(0.0, 0.0, 0.0), rotation: Vec3::new(0.0, 0.0, 0.0), scale: Vec3::new(1.0, 1.0, 1.0) }
+    }
+    pub fn vertices(&self) -> &Vec<Vec3> {
+        &self.vertices
+    }
+
+    pub fn indices(&self) -> &Vec<[u64; 3]> {
+        &self.indices
+    }
+
+    pub fn location(&self) -> &Vec3 {
+        &self.location
+    }
+
+    pub fn rotation(&self) -> &Vec3 {
+        &self.rotation
+    }
+
+    pub fn scale(&self) -> &Vec3 {
+        &self.scale
+    }
+
+    pub fn set_location(&mut self, location: Vec3) {
+        self.location = location;
+    }
+
+    pub fn set_rotation(&mut self, rotation: Vec3) {
+        self.rotation = rotation;
+    }
+
+    pub fn set_scale(&mut self, scale: Vec3) {
+        self.scale = scale;
     }
 
 }
