@@ -1,3 +1,5 @@
+use std::f64::consts::PI;
+
 use crate::pipeline::math::vec3::Vec3;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -38,6 +40,127 @@ impl Model {
 
         Model { vertices, indices, location: Vec3::new(0.0, 0.0, 0.0), rotation: Vec3::new(0.0, 0.0, 0.0), scale: Vec3::new(1.0, 1.0, 1.0) }
     }
+
+    pub fn sphere(size: f64, detailing : u64) -> Self {
+        let radius = size / 2.0;
+        let rings = detailing.max(2);
+        let segments = detailing.max(3);
+
+        let mut vertices = Vec::with_capacity(((rings + 1) * (segments + 1)) as usize);
+        for ring in 0..=rings {
+            let phi = PI * ring as f64 / rings as f64;
+            for segment in 0..=segments {
+                let theta = 2.0 * PI * segment as f64 / segments as f64;
+                vertices.push(Vec3::new(
+                    radius * phi.sin() * theta.cos(),
+                    radius * phi.cos(),
+                    radius * phi.sin() * theta.sin(),
+                ));
+            }
+        }
+
+        let mut indices = Vec::with_capacity((2 * rings * segments) as usize);
+        for ring in 0..rings {
+            for segment in 0..segments {
+                let current = ring * (segments + 1) + segment;
+                let next = current + segments + 1;
+
+                if ring != 0 {
+                    indices.push([current, next, current + 1]);
+                }
+                if ring != rings - 1 {
+                    indices.push([current + 1, next, next + 1]);
+                }
+            }
+        }
+
+        Model::new(vertices, indices, Vec3::new(0.0, 0.0, 0.0), Vec3::new(0.0, 0.0, 0.0), Vec3::new(1.0, 1.0, 1.0))
+    }
+
+    pub fn pyramid(size: f64, height: f64) -> Self {
+        let half_size = size / 2.0;
+        let half_height = height / 2.0;
+
+        let vertices = vec![
+            Vec3::new(-half_size, -half_height, -half_size),
+            Vec3::new(half_size, -half_height, -half_size),
+            Vec3::new(half_size, -half_height, half_size),
+            Vec3::new(-half_size, -half_height, half_size),
+            Vec3::new(0.0, half_height, 0.0), // apex
+        ];
+
+        let indices = vec![
+            [0, 2, 1], [0, 3, 2], // base
+            [0, 1, 4], // front face
+            [1, 2, 4], // right face
+            [2, 3, 4], // back face
+            [3, 0, 4], // left face
+        ];
+
+        Model::new(vertices, indices, Vec3::new(0.0, 0.0, 0.0), Vec3::new(0.0, 0.0, 0.0), Vec3::new(1.0, 1.0, 1.0))
+    }
+
+    pub fn cone(size: f64, height: f64, detailing: u64) -> Self {
+        let radius = size / 2.0;
+        let half_height = height / 2.0;
+        let segments = detailing.max(3);
+
+        let mut vertices = Vec::with_capacity(segments as usize + 2);
+        vertices.push(Vec3::new(0.0, half_height, 0.0)); // apex
+        vertices.push(Vec3::new(0.0, -half_height, 0.0)); // base center
+
+        for segment in 0..segments {
+            let theta = 2.0 * PI * segment as f64 / segments as f64;
+            vertices.push(Vec3::new(radius * theta.cos(), -half_height, radius * theta.sin()));
+        }
+
+        let mut indices = Vec::with_capacity((2 * segments) as usize);
+        for segment in 0..segments {
+            let current = 2 + segment;
+            let next = 2 + (segment + 1) % segments;
+
+            indices.push([0, current, next]); // side
+            indices.push([1, next, current]); // base
+        }
+
+        Model::new(vertices, indices, Vec3::new(0.0, 0.0, 0.0), Vec3::new(0.0, 0.0, 0.0), Vec3::new(1.0, 1.0, 1.0))
+    }
+
+    pub fn cylinder(size: f64, height: f64, detailing: u64) -> Self {
+        let radius = size / 2.0;
+        let half_height = height / 2.0;
+        let segments = detailing.max(3);
+
+        let mut vertices = Vec::with_capacity(2 * segments as usize + 2);
+        vertices.push(Vec3::new(0.0, -half_height, 0.0)); // bottom center
+        vertices.push(Vec3::new(0.0, half_height, 0.0)); // top center
+
+        for segment in 0..segments {
+            let theta = 2.0 * PI * segment as f64 / segments as f64;
+            vertices.push(Vec3::new(radius * theta.cos(), -half_height, radius * theta.sin()));
+        }
+
+        for segment in 0..segments {
+            let theta = 2.0 * PI * segment as f64 / segments as f64;
+            vertices.push(Vec3::new(radius * theta.cos(), half_height, radius * theta.sin()));
+        }
+
+        let mut indices = Vec::with_capacity((4 * segments) as usize);
+        for segment in 0..segments {
+            let bottom = 2 + segment;
+            let bottom_next = 2 + (segment + 1) % segments;
+            let top = 2 + segments + segment;
+            let top_next = 2 + segments + (segment + 1) % segments;
+
+            indices.push([bottom, top, bottom_next]); // side
+            indices.push([bottom_next, top, top_next]); // side
+            indices.push([0, bottom_next, bottom]); // bottom cap
+            indices.push([1, top, top_next]); // top cap
+        }
+
+        Model::new(vertices, indices, Vec3::new(0.0, 0.0, 0.0), Vec3::new(0.0, 0.0, 0.0), Vec3::new(1.0, 1.0, 1.0))
+    }
+
     pub fn vertices(&self) -> &Vec<Vec3> {
         &self.vertices
     }
@@ -71,3 +194,4 @@ impl Model {
     }
 
 }
+
