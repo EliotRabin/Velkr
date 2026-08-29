@@ -5,6 +5,7 @@ use crate::pipeline::geometry::camera::{Camera, ProjectionType};
 use crate::pipeline::geometry::model::Model;
 use crate::pipeline::geometry::world::World;
 use crate::pipeline::math::vec3::Vec3;
+use crate::pipeline::rasterization::color::Color;
 
 const WIDTH: usize = 1280;
 const HEIGHT: usize = 720;
@@ -14,7 +15,7 @@ fn main() {
     let world = build_world();
 
     let mut app = App::new("RustRayTracer", WIDTH, HEIGHT, world).expect("fenêtre impossible à créer");
-    app.run([0, 0, 0], [255, 0, 0]).expect("affichage impossible");
+    app.run(Color::new(0, 0, 0), Color::new(255, 0, 0)).expect("affichage impossible");
 }
 
 fn build_world() -> World {
@@ -25,7 +26,7 @@ fn build_world() -> World {
         Vec3::new(0.0, 1.0, 0.0),
         45.0,
         aspect_ratio,
-        ProjectionType::Perspective(45.0, aspect_ratio, 0.1, 100.0),
+        ProjectionType::Perspective(45.0, aspect_ratio, 5.0, 1000.0),
     );
 
     let mut world = World::new(Vec::new(), camera);

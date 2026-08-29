@@ -1,4 +1,4 @@
-use minifb::{Key, Window as MinifbWindow, WindowOptions};
+use minifb::{Key, KeyRepeat, Window as MinifbWindow, WindowOptions};
 
 use crate::pipeline::rasterization::framebuffer::Framebuffer;
 
@@ -22,11 +22,15 @@ impl Window {
         self.window.is_key_down(key)
     }
 
+    pub fn is_key_pressed(&self, key: Key) -> bool {
+        self.window.is_key_pressed(key, KeyRepeat::No)
+    }
+
     pub fn display(&mut self, framebuffer: &Framebuffer) -> Result<(), minifb::Error> {
         let buffer: Vec<u32> = framebuffer
             .color_buffer()
             .iter()
-            .map(|color| ((color[0] as u32) << 16) | ((color[1] as u32) << 8) | color[2] as u32)
+            .map(|color| ((color.r() as u32) << 16) | ((color.g() as u32) << 8) | color.b() as u32)
             .collect();
 
         self.window

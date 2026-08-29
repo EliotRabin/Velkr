@@ -1,14 +1,15 @@
+use crate::pipeline::rasterization::color::Color;
 use crate::pipeline::screen::viewport::Viewport;
 
 pub struct Framebuffer {
     viewport: Viewport,
-    color_buffer: Vec<[u8; 3]>,
+    color_buffer: Vec<Color>,
     depth_buffer: Vec<f32>,
 }
 
 impl Framebuffer {
     pub fn new(width: usize, height: usize) -> Self {
-        let color_buffer = vec![[0, 0, 0]; width * height];
+        let color_buffer = vec![Color::new(0, 0, 0); width * height];
         let depth_buffer = vec![f32::INFINITY; width * height];
         let viewport = Viewport::new(width, height);
         Framebuffer {
@@ -30,7 +31,7 @@ impl Framebuffer {
         self.viewport.height()
     }
 
-    pub fn color_buffer(&self) -> &[[u8; 3]] {
+    pub fn color_buffer(&self) -> &[Color] {
         &self.color_buffer
     }
 
@@ -38,7 +39,7 @@ impl Framebuffer {
         &self.depth_buffer
     }
 
-    pub fn clear(&mut self, color: [u8; 3]) {
+    pub fn clear(&mut self, color: Color) {
         for pixel in self.color_buffer.iter_mut() {
             *pixel = color;
         }
@@ -47,7 +48,7 @@ impl Framebuffer {
         }
     }
 
-    pub fn set_pixel(&mut self, x: isize, y: isize, color: [u8; 3]) {
+    pub fn set_pixel(&mut self, x: isize, y: isize, depth: f32, color: Color) {
         if x < 0 || y < 0 {
             return;
         }
@@ -60,6 +61,36 @@ impl Framebuffer {
         }
 
         let index = y * self.viewport.width() + x;
+
+        if depth >= self.depth_buffer[index] {
+            return;
+        }
+
+        self.depth_buffer[index] = depth;
         self.color_buffer[index] = color;
+    }
+
+    pub fn draw_depth_buffer(&mut self) {
+        let mut nearest = f32::INFINITY;
+        let mut farthest = f32::NEG_INFINITY;
+
+        for depth in self.depth_buffer.iter() {
+            if depth.is_finite() {
+                nearest = nearest.min(*depth);
+                farthest = farthest.max(*depth);
+            }
+        }
+
+        let range = farthest - nearest;
+
+        for (pixel, depth) in self.color_buffer.iter_mut().zip(self.depth_buffer.iter()) {
+            if depth.is_finite() {
+                let normalized = if range > 0.0 { (depth - nearest) / range } else { 0.0 };
+                let shade = ((1.0 - normalized) * 255.0) as u8;
+                *pixel = Color::new(shade, shade, shade);
+            } else {
+                *pixel = Color::new(0, 0, 0);
+            }
+        }
     }
 }
