@@ -161,6 +161,19 @@ impl Model {
         Model::new(vertices, indices, Vec3::new(0.0, 0.0, 0.0), Vec3::new(0.0, 0.0, 0.0), Vec3::new(1.0, 1.0, 1.0))
     }
 
+    pub fn plane(size: f64) -> Self {
+        let mut vertices = vec![
+            Vec3::new(-size/2.0, 0.0, -size/2.0),
+            Vec3::new(-size/2.0, 0.0, size/2.0),
+            Vec3::new(size/2.0, 0.0, -size/2.0),
+            Vec3::new(size/2.0, 0.0, size/2.0),
+        ];
+
+        let indices =  vec![[0, 1, 2], [1, 2, 3]];
+
+        Model::new(vertices, indices, Vec3::new(0.0, 0.0, 0.0), Vec3::new(0.0, 0.0, 0.0), Vec3::new(1.0, 1.0, 1.0))
+    }
+
     pub fn vertices(&self) -> &Vec<Vec3> {
         &self.vertices
     }

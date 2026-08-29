@@ -1,5 +1,5 @@
 use crate::pipeline::math::vec3::Vec3;
-use crate::pipeline::rasterization::viewport::Viewport;
+use crate::pipeline::screen::viewport::Viewport;
 use std::ops::Mul;
 use crate::pipeline::geometry::camera::Camera;
 use crate::pipeline::geometry::model::Model;
