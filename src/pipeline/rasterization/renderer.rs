@@ -1,3 +1,4 @@
+use crate::pipeline::geometry::triangle::Triangle;
 use crate::pipeline::geometry::world::World;
 use crate::pipeline::math::mat4::{Mat4, MatrixType};
 use crate::pipeline::math::vec3::Vec3;
@@ -30,11 +31,13 @@ impl Renderer {
                 projected_vertices.push(mvp_matrix * *vertex);
             }
 
-            for triangle in model.indices() {
-                let v0 = &projected_vertices[triangle[0] as usize];
-                let v1 = &projected_vertices[triangle[1] as usize];
-                let v2 = &projected_vertices[triangle[2] as usize];
-                self.draw_triangle(framebuffer, [v0, v1, v2], color);
+            for indices in model.indices() {
+                let triangle = Triangle::new(
+                    projected_vertices[indices[0] as usize],
+                    projected_vertices[indices[1] as usize],
+                    projected_vertices[indices[2] as usize],
+                );
+                self.draw_triangle(framebuffer, &triangle, color);
             }
         }
     }
@@ -67,46 +70,32 @@ impl Renderer {
         }
     }
 
-    fn draw_triangle(&self, framebuffer: &mut Framebuffer, triangle: [&Vec3; 3], color: Color) {
-        let (v0, v1, v2) = (triangle[0], triangle[1], triangle[2]);
-
-        let min_x = v0.x().min(v1.x()).min(v2.x()).floor().max(0.0) as isize;
-        let max_x = v0.x().max(v1.x()).max(v2.x()).ceil().min(framebuffer.width() as f64 - 1.0) as isize;
-        let min_y = v0.y().min(v1.y()).min(v2.y()).floor().max(0.0) as isize;
-        let max_y = v0.y().max(v1.y()).max(v2.y()).ceil().min(framebuffer.height() as f64 - 1.0) as isize;
-
-        let area = Self::edge(v0, v1, v2);
-        if area == 0.0 {
+    fn draw_triangle(&self, framebuffer: &mut Framebuffer, triangle: &Triangle, color: Color) {
+        let area = triangle.signed_area();
+        if area <= 0.0 {
             return;
         }
+
+        let (min, max) = triangle.bounding_box();
+        let min_x = min.x().floor().max(0.0) as isize;
+        let max_x = max.x().ceil().min(framebuffer.width() as f64 - 1.0) as isize;
+        let min_y = min.y().floor().max(0.0) as isize;
+        let max_y = max.y().ceil().min(framebuffer.height() as f64 - 1.0) as isize;
 
         for y in min_y..=max_y {
             for x in min_x..=max_x {
                 let p = Vec3::new(x as f64 + 0.5, y as f64 + 0.5, 0.0);
+                let (w0, w1, w2) = triangle.edge_weights(&p);
 
-                let w0 = Self::edge(v1, v2, &p);
-                let w1 = Self::edge(v2, v0, &p);
-                let w2 = Self::edge(v0, v1, &p);
-
-                let inside = if area > 0.0 {
-                    w0 >= 0.0 && w1 >= 0.0 && w2 >= 0.0
-                } else {
-                    w0 <= 0.0 && w1 <= 0.0 && w2 <= 0.0
-                };
-
-                if inside {
+                if w0 >= 0.0 && w1 >= 0.0 && w2 >= 0.0 {
                     let alpha = w0 / area;
                     let beta = w1 / area;
                     let gamma = w2 / area;
-                    let depth = alpha * v0.z() + beta * v1.z() + gamma * v2.z();
+                    let depth = triangle.interpolate_z(alpha, beta, gamma);
 
                     framebuffer.set_pixel(x, y, depth as f32, color);
                 }
             }
         }
-    }
-
-    fn edge(p0: &Vec3, p1: &Vec3, p: &Vec3) -> f64 {
-        (p.x() - p0.x()) * (p1.y() - p0.y()) - (p.y() - p0.y()) * (p1.x() - p0.x())
     }
 }

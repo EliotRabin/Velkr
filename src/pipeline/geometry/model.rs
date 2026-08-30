@@ -30,12 +30,12 @@ impl Model {
         ];
 
         let indices = vec![
-            [0, 1, 2], [0, 2, 3], // back face
-            [4, 5, 6], [4, 6, 7], // front face
-            [0, 1, 5], [0, 5, 4], // bottom face
-            [2, 3, 7], [2, 7, 6], // top face
-            [0, 3, 7], [0, 7, 4], // left face
-            [1, 2, 6], [1, 6, 5], // right face
+            [0, 2, 1], [0, 3, 2],
+            [4, 5, 6], [4, 6, 7],
+            [0, 1, 5], [0, 5, 4],
+            [2, 3, 7], [2, 7, 6],
+            [0, 7, 3], [0, 4, 7],
+            [1, 2, 6], [1, 6, 5],
         ];
 
         Model { vertices, indices, location: Vec3::new(0.0, 0.0, 0.0), rotation: Vec3::new(0.0, 0.0, 0.0), scale: Vec3::new(1.0, 1.0, 1.0) }
@@ -66,10 +66,10 @@ impl Model {
                 let next = current + segments + 1;
 
                 if ring != 0 {
-                    indices.push([current, next, current + 1]);
+                    indices.push([current, current + 1, next]);
                 }
                 if ring != rings - 1 {
-                    indices.push([current + 1, next, next + 1]);
+                    indices.push([current + 1, next + 1, next]);
                 }
             }
         }
@@ -90,11 +90,11 @@ impl Model {
         ];
 
         let indices = vec![
-            [0, 2, 1], [0, 3, 2], // base
-            [0, 1, 4], // front face
-            [1, 2, 4], // right face
-            [2, 3, 4], // back face
-            [3, 0, 4], // left face
+            [0, 1, 2], [0, 2, 3],
+            [0, 4, 1],
+            [1, 4, 2],
+            [2, 4, 3],
+            [3, 4, 0],
         ];
 
         Model::new(vertices, indices, Vec3::new(0.0, 0.0, 0.0), Vec3::new(0.0, 0.0, 0.0), Vec3::new(1.0, 1.0, 1.0))
@@ -119,8 +119,8 @@ impl Model {
             let current = 2 + segment;
             let next = 2 + (segment + 1) % segments;
 
-            indices.push([0, current, next]); // side
-            indices.push([1, next, current]); // base
+            indices.push([0, next, current]); // side
+            indices.push([1, current, next]); // base
         }
 
         Model::new(vertices, indices, Vec3::new(0.0, 0.0, 0.0), Vec3::new(0.0, 0.0, 0.0), Vec3::new(1.0, 1.0, 1.0))
@@ -154,8 +154,8 @@ impl Model {
 
             indices.push([bottom, top, bottom_next]); // side
             indices.push([bottom_next, top, top_next]); // side
-            indices.push([0, bottom_next, bottom]); // bottom cap
-            indices.push([1, top, top_next]); // top cap
+            indices.push([0, bottom, bottom_next]); // bottom cap
+            indices.push([1, top_next, top]); // top cap
         }
 
         Model::new(vertices, indices, Vec3::new(0.0, 0.0, 0.0), Vec3::new(0.0, 0.0, 0.0), Vec3::new(1.0, 1.0, 1.0))
@@ -169,7 +169,7 @@ impl Model {
             Vec3::new(size/2.0, 0.0, size/2.0),
         ];
 
-        let indices =  vec![[0, 1, 2], [1, 2, 3]];
+        let indices =  vec![[0, 1, 2], [1, 3, 2]];
 
         Model::new(vertices, indices, Vec3::new(0.0, 0.0, 0.0), Vec3::new(0.0, 0.0, 0.0), Vec3::new(1.0, 1.0, 1.0))
     }
