@@ -11,11 +11,11 @@ pub struct Mat4 {
 }
 
 pub enum MatrixType<'a> {
-    ModelMatrix(&'a Model),
+    ModelMatrix(&'a Model<'a>),
     ViewMatrix(&'a Camera),
     ProjectionMatrix(&'a Camera),
     ViewportMatrix(&'a Viewport),
-    MVPMatrix(&'a Model, &'a Camera, &'a Viewport),
+    MVPMatrix(&'a Model<'a>, &'a Camera, &'a Viewport),
 }
 
 impl Mat4 {

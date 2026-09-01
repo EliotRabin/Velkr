@@ -9,16 +9,16 @@ use crate::pipeline::rasterization::framebuffer::Framebuffer;
 use crate::pipeline::rasterization::renderer::Renderer;
 use crate::pipeline::screen::window::Window;
 
-pub struct App {
-    world: World,
+pub struct App<'a> {
+    world: World<'a>,
     framebuffer: Framebuffer,
     renderer: Renderer,
     window: Window,
     debug_depth: bool,
 }
 
-impl App {
-    pub fn new(title: &str, width: usize, height: usize, world: World) -> Result<Self, minifb::Error> {
+impl<'a> App<'a> {
+    pub fn new(title: &str, width: usize, height: usize, world: World<'a>) -> Result<Self, minifb::Error> {
         Ok(App {
             world,
             framebuffer: Framebuffer::new(width, height),
@@ -36,11 +36,11 @@ impl App {
         self.debug_depth = debug_depth;
     }
 
-    pub fn world(&self) -> &World {
+    pub fn world(&self) -> &World<'a> {
         &self.world
     }
 
-    pub fn world_mut(&mut self) -> &mut World {
+    pub fn world_mut(&mut self) -> &mut World<'a> {
         &mut self.world
     }
 

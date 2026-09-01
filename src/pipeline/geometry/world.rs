@@ -1,17 +1,17 @@
 use crate::pipeline::geometry::camera::Camera;
 use crate::pipeline::geometry::model::Model;
 
-pub struct World {
-    models: Vec<Model>,
+pub struct World<'a> {
+    models: Vec<Model<'a>>,
     camera: Camera,
 }
 
-impl World {
-    pub fn new(models: Vec<Model>, camera: Camera) -> Self {
+impl<'a> World<'a> {
+    pub fn new(models: Vec<Model<'a>>, camera: Camera) -> Self {
         World { models, camera }
     }
 
-    pub fn models(&self) -> &Vec<Model> {
+    pub fn models(&self) -> &Vec<Model<'a>> {
         &self.models
     }
 
@@ -19,11 +19,11 @@ impl World {
         &self.camera
     }
 
-    pub fn models_mut(&mut self) -> &mut Vec<Model> {
+    pub fn models_mut(&mut self) -> &mut Vec<Model<'a>> {
         &mut self.models
     }
 
-    pub fn add_model(&mut self, model: Model) {
+    pub fn add_model(&mut self, model: Model<'a>) {
         self.models.push(model);
     }
 

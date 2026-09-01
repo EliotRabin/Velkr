@@ -1,3 +1,4 @@
+use crate::pipeline::math::mat4::Mat4;
 use crate::pipeline::math::vec3::Vec3;
 use crate::pipeline::rasterization::color::Color;
 
@@ -40,6 +41,7 @@ impl Interpolable for Color {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum AttributKind {
     Position,
+    ScreenPosition,
     Normal,
     Color,
     Uv,
@@ -187,12 +189,14 @@ impl Fragment {
         self.vector(AttributKind::Position).unwrap_or(Vec3::new(0.0, 0.0, 0.0))
     }
 
-    pub fn depth(&self) -> f64 {
-        self.position().z()
-    }
-
     pub fn set_position(&mut self, position: Vec3) {
         self.set_attribut(Attribut::vector(AttributKind::Position, position));
+    }
+
+    pub fn transformed(&self, matrix: &Mat4) -> Fragment {
+        let mut fragment = self.clone();
+        fragment.set_position(*matrix * self.position());
+        fragment
     }
 
     pub fn attributs(&self) -> &Vec<Attribut> {
