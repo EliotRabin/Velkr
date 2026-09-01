@@ -35,6 +35,10 @@ impl Framebuffer {
         &self.color_buffer
     }
 
+    pub fn color_buffer_mut(&mut self) -> &mut [Color] {
+        &mut self.color_buffer
+    }
+
     pub fn depth_buffer(&self) -> &[f32] {
         &self.depth_buffer
     }

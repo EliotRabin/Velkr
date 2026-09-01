@@ -1,3 +1,5 @@
+use rayon::prelude::*;
+
 use crate::pipeline::geometry::ray::Ray;
 use crate::pipeline::geometry::triangle::Triangle;
 use crate::pipeline::geometry::world::World;
@@ -14,25 +16,31 @@ impl Raytracer {
 
     pub fn render(&self, world: &World<'_>, framebuffer: &mut Framebuffer) {
         let camera = world.camera();
+        let lights = world.lights();
         let vertices = world.world_vertices();
         let triangles = world.world_triangles(&vertices);
 
-        for y in 0..framebuffer.height() {
-            for x in 0..framebuffer.width() {
-                let ray = camera.ray(x, y, framebuffer.viewport());
+        let viewport = *framebuffer.viewport();
+        let width = viewport.width();
 
-                if let Some(intersection) = Self::closest_intersection(&triangles, &ray) {
-                    let color = Shading::lambert(
-                        &intersection.point(),
-                        &intersection.normal(),
-                        intersection.surface(),
-                        world.lights(),
-                    );
+        framebuffer
+            .color_buffer_mut()
+            .par_chunks_mut(width)
+            .enumerate()
+            .for_each(|(y, row)| {
+                for (x, pixel) in row.iter_mut().enumerate() {
+                    let ray = camera.ray(x, y, &viewport);
 
-                    framebuffer.set_pixel(x as isize, y as isize, intersection.distance() as f32, color);
+                    if let Some(intersection) = Self::closest_intersection(&triangles, &ray) {
+                        *pixel = Shading::lambert(
+                            &intersection.point(),
+                            &intersection.normal(),
+                            intersection.surface(),
+                            lights,
+                        );
+                    }
                 }
-            }
-        }
+            });
     }
 
     fn closest_intersection<'a>(triangles: &[Triangle<'a>], ray: &Ray) -> Option<Intersection<'a>> {
