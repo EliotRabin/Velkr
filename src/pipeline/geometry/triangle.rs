@@ -1,5 +1,9 @@
 use crate::pipeline::geometry::fragment::Fragment;
+use crate::pipeline::geometry::hit::Hit;
+use crate::pipeline::geometry::ray::Ray;
 use crate::pipeline::math::vec3::Vec3;
+
+const PARALLEL_EPSILON: f64 = 1e-9;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Triangle<'a> {
@@ -47,6 +51,39 @@ impl<'a> Triangle<'a> {
     pub fn bounding_box(&self) -> (Vec3, Vec3) {
         let (p0, p1, p2) = self.positions();
         (p0.min(&p1).min(&p2), p0.max(&p1).max(&p2))
+    }
+
+    pub fn intersect(&self, ray: &Ray) -> Option<Hit> {
+        let (edge1, edge2) = self.edges();
+
+        let h = ray.direction().cross(&edge2);
+        let determinant = edge1.dot(&h);
+
+        if determinant.abs() < PARALLEL_EPSILON {
+            return None;
+        }
+
+        let inverse = 1.0 / determinant;
+        let s = ray.origin() - self.v0.position();
+
+        let u = inverse * s.dot(&h);
+        if u < 0.0 || u > 1.0 {
+            return None;
+        }
+
+        let q = s.cross(&edge1);
+
+        let v = inverse * ray.direction().dot(&q);
+        if v < 0.0 || u + v > 1.0 {
+            return None;
+        }
+
+        let distance = inverse * edge2.dot(&q);
+        if distance <= 0.0 {
+            return None;
+        }
+
+        Some(Hit::new(distance, u, v))
     }
 
     pub fn interpolate(&self, alpha: f64, beta: f64, gamma: f64) -> Fragment {

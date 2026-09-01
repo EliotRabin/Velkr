@@ -1,4 +1,4 @@
-use crate::pipeline::rasterization::color::Color;
+﻿use crate::pipeline::screen::color::Color;
 use crate::pipeline::screen::viewport::Viewport;
 
 pub struct Framebuffer {
@@ -70,27 +70,4 @@ impl Framebuffer {
         self.color_buffer[index] = color;
     }
 
-    pub fn draw_depth_buffer(&mut self) {
-        let mut nearest = f32::INFINITY;
-        let mut farthest = f32::NEG_INFINITY;
-
-        for depth in self.depth_buffer.iter() {
-            if depth.is_finite() {
-                nearest = nearest.min(*depth);
-                farthest = farthest.max(*depth);
-            }
-        }
-
-        let range = farthest - nearest;
-
-        for (pixel, depth) in self.color_buffer.iter_mut().zip(self.depth_buffer.iter()) {
-            if depth.is_finite() {
-                let normalized = if range > 0.0 { (depth - nearest) / range } else { 0.0 };
-                let shade = ((1.0 - normalized) * 255.0) as u8;
-                *pixel = Color::new(shade, shade, shade);
-            } else {
-                *pixel = Color::new(0, 0, 0);
-            }
-        }
-    }
 }

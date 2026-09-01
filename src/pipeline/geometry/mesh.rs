@@ -1,9 +1,10 @@
 use std::f64::consts::PI;
 
-use crate::pipeline::geometry::fragment::Fragment;
+use crate::pipeline::geometry::fragment::{Attribut, AttributKind, Fragment};
 use crate::pipeline::geometry::triangle::Triangle;
 use crate::pipeline::math::mat4::Mat4;
 use crate::pipeline::math::vec3::Vec3;
+use crate::pipeline::screen::color::Color;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Mesh {
@@ -177,6 +178,14 @@ impl Mesh {
         let indices =  vec![[0, 1, 2], [1, 3, 2]];
 
         Mesh::from_positions(positions, indices)
+    }
+
+    pub fn with_color(mut self, color: Color) -> Self {
+        for vertex in self.vertices.iter_mut() {
+            vertex.set_attribut(Attribut::color(AttributKind::Color, color));
+        }
+
+        self
     }
 
     pub fn vertices(&self) -> &Vec<Fragment> {

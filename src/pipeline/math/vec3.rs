@@ -55,6 +55,10 @@ impl Vec3 {
         Vec3::new(x, y, z)
     }
 
+    pub fn reflect(&self, normal: &Vec3) -> Vec3 {
+        *self - *normal * (2.0 * self.dot(normal))
+    }
+
     pub fn cross_z(&self, other: &Vec3) -> f64 {
         self.x * other.y - self.y * other.x
     }

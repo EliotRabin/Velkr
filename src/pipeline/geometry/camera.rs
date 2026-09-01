@@ -1,4 +1,6 @@
+use crate::pipeline::geometry::ray::Ray;
 use crate::pipeline::math::vec3::Vec3;
+use crate::pipeline::screen::viewport::Viewport;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum ProjectionType {
@@ -57,6 +59,24 @@ impl Camera {
 
     pub fn projection_type(&self) -> &ProjectionType {
         &self.projection_type
+    }
+
+    pub fn basis(&self) -> (Vec3, Vec3, Vec3) {
+        let forward = self.forward.normalize();
+        let right = forward.cross(&self.up).normalize();
+        let up = right.cross(&forward);
+
+        (forward, right, up)
+    }
+
+    pub fn ray(&self, x: usize, y: usize, viewport: &Viewport) -> Ray {
+        let (forward, right, up) = self.basis();
+        let tangent = (self.fov / 2.0).to_radians().tan();
+
+        let sx = (2.0 * (x as f64 + 0.5) / viewport.width() as f64 - 1.0) * self.aspect_ratio * tangent;
+        let sy = (1.0 - 2.0 * (y as f64 + 0.5) / viewport.height() as f64) * tangent;
+
+        Ray::new(self.position, forward + right * sx + up * sy)
     }
 
     

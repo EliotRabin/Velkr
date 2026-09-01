@@ -1,6 +1,6 @@
-use crate::pipeline::math::mat4::Mat4;
+﻿use crate::pipeline::math::mat4::Mat4;
 use crate::pipeline::math::vec3::Vec3;
-use crate::pipeline::rasterization::color::Color;
+use crate::pipeline::screen::color::Color;
 
 pub trait Interpolable: Copy {
     fn interpolate(v0: Self, v1: Self, v2: Self, alpha: f64, beta: f64, gamma: f64) -> Self;
@@ -24,16 +24,14 @@ impl Interpolable for Vec3 {
 
 impl Interpolable for Color {
     fn interpolate(v0: Color, v1: Color, v2: Color, alpha: f64, beta: f64, gamma: f64) -> Color {
-        let channel = |c0: u8, c1: u8, c2: u8| {
-            f64::interpolate(c0 as f64, c1 as f64, c2 as f64, alpha, beta, gamma)
-                .round()
-                .clamp(0.0, 255.0) as u8
+        let channel = |c0: f64, c1: f64, c2: f64| {
+            f64::interpolate(c0, c1, c2, alpha, beta, gamma)
         };
 
-        Color::new(
-            channel(v0.r(), v1.r(), v2.r()),
-            channel(v0.g(), v1.g(), v2.g()),
-            channel(v0.b(), v1.b(), v2.b()),
+        Color::from_f64(
+            channel(v0.red(), v1.red(), v2.red()),
+            channel(v0.green(), v1.green(), v2.green()),
+            channel(v0.blue(), v1.blue(), v2.blue()),
         )
     }
 }

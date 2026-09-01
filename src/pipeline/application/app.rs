@@ -1,20 +1,17 @@
 use std::f64::consts::PI;
 
-use minifb::Key;
-
 use crate::pipeline::geometry::world::World;
 use crate::pipeline::math::vec3::Vec3;
-use crate::pipeline::rasterization::color::Color;
-use crate::pipeline::rasterization::framebuffer::Framebuffer;
-use crate::pipeline::rasterization::renderer::Renderer;
+use crate::pipeline::raytracing::raytracer::Raytracer;
+use crate::pipeline::screen::color::Color;
+use crate::pipeline::screen::framebuffer::Framebuffer;
 use crate::pipeline::screen::window::Window;
 
 pub struct App<'a> {
     world: World<'a>,
     framebuffer: Framebuffer,
-    renderer: Renderer,
+    raytracer: Raytracer,
     window: Window,
-    debug_depth: bool,
 }
 
 impl<'a> App<'a> {
@@ -22,18 +19,9 @@ impl<'a> App<'a> {
         Ok(App {
             world,
             framebuffer: Framebuffer::new(width, height),
-            renderer: Renderer::new(),
+            raytracer: Raytracer::new(),
             window: Window::new(title, width, height)?,
-            debug_depth: false,
         })
-    }
-
-    pub fn debug_depth(&self) -> bool {
-        self.debug_depth
-    }
-
-    pub fn set_debug_depth(&mut self, debug_depth: bool) {
-        self.debug_depth = debug_depth;
     }
 
     pub fn world(&self) -> &World<'a> {
@@ -44,20 +32,12 @@ impl<'a> App<'a> {
         &mut self.world
     }
 
-    pub fn run(&mut self, clear_color: Color, wireframe_color: Color) -> Result<(), minifb::Error> {
+    pub fn run(&mut self, clear_color: Color) -> Result<(), minifb::Error> {
         while self.window.is_open() {
-            if self.window.is_key_pressed(Key::D) {
-                self.debug_depth = !self.debug_depth;
-            }
-
             self.update();
 
             self.framebuffer.clear(clear_color);
-            self.renderer.render(&self.world, &mut self.framebuffer, wireframe_color);
-
-            if self.debug_depth {
-                self.framebuffer.draw_depth_buffer();
-            }
+            self.raytracer.render(&self.world, &mut self.framebuffer);
 
             self.window.display(&self.framebuffer)?;
         }

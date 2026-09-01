@@ -1,6 +1,6 @@
-use minifb::{Key, KeyRepeat, Window as MinifbWindow, WindowOptions};
+﻿use minifb::{Key, KeyRepeat, Window as MinifbWindow, WindowOptions};
 
-use crate::pipeline::rasterization::framebuffer::Framebuffer;
+use crate::pipeline::screen::framebuffer::Framebuffer;
 
 pub struct Window {
     window: MinifbWindow,

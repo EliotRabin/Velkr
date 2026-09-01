@@ -1,8 +1,8 @@
-use crate::pipeline::geometry::world::World;
+﻿use crate::pipeline::geometry::world::World;
 use crate::pipeline::math::mat4::{Mat4, MatrixType};
 use crate::pipeline::math::vec3::Vec3;
-use crate::pipeline::rasterization::color::Color;
-use crate::pipeline::rasterization::framebuffer::Framebuffer;
+use crate::pipeline::screen::color::Color;
+use crate::pipeline::screen::framebuffer::Framebuffer;
 use crate::pipeline::rasterization::screen_triangle::ScreenTriangle;
 
 pub struct Renderer;
@@ -12,6 +12,11 @@ impl Renderer {
         Renderer
     }
 
+    pub fn render(&self, world: &World<'_>, framebuffer: &mut Framebuffer) {
+        
+    }
+
+    /* Used for legacy rendering
     pub fn render(&self, world: &World<'_>, framebuffer: &mut Framebuffer, color: Color) {
         let camera = world.camera();
 
@@ -79,5 +84,5 @@ impl Renderer {
                 }
             }
         }
-    }
+    }*/
 }
