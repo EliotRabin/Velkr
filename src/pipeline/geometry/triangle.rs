@@ -1,4 +1,4 @@
-use crate::pipeline::geometry::fragment::Fragment;
+use crate::pipeline::geometry::fragment::{Fragment, Interpolable};
 use crate::pipeline::math::vec3::Vec3;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -67,7 +67,7 @@ impl Triangle {
     }
 
     pub fn interpolate_z(&self, alpha: f64, beta: f64, gamma: f64) -> f64 {
-        alpha * self.v0.depth() + beta * self.v1.depth() + gamma * self.v2.depth()
+        f64::interpolate(self.v0.depth(), self.v1.depth(), self.v2.depth(), alpha, beta, gamma)
     }
 
     pub fn fragment_at(&self, p: &Vec3) -> Option<Fragment> {
@@ -76,6 +76,6 @@ impl Triangle {
     }
 
     fn edge(p0: &Vec3, p1: &Vec3, p: &Vec3) -> f64 {
-        (p.x() - p0.x()) * (p1.y() - p0.y()) - (p.y() - p0.y()) * (p1.x() - p0.x())
+        (*p - *p0).cross_z(&(*p1 - *p0))
     }
 }

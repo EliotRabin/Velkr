@@ -13,14 +13,18 @@ impl Interpolable for f64 {
 
 impl Interpolable for Vec3 {
     fn interpolate(v0: Vec3, v1: Vec3, v2: Vec3, alpha: f64, beta: f64, gamma: f64) -> Vec3 {
-        v0 * alpha + v1 * beta + v2 * gamma
+        Vec3::new(
+            f64::interpolate(v0.x(), v1.x(), v2.x(), alpha, beta, gamma),
+            f64::interpolate(v0.y(), v1.y(), v2.y(), alpha, beta, gamma),
+            f64::interpolate(v0.z(), v1.z(), v2.z(), alpha, beta, gamma),
+        )
     }
 }
 
 impl Interpolable for Color {
     fn interpolate(v0: Color, v1: Color, v2: Color, alpha: f64, beta: f64, gamma: f64) -> Color {
         let channel = |c0: u8, c1: u8, c2: u8| {
-            (alpha * c0 as f64 + beta * c1 as f64 + gamma * c2 as f64)
+            f64::interpolate(c0 as f64, c1 as f64, c2 as f64, alpha, beta, gamma)
                 .round()
                 .clamp(0.0, 255.0) as u8
         };

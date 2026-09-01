@@ -37,17 +37,15 @@ impl Vec3 {
     }
 
     pub fn distance(&self, other: &Vec3) -> f64 {
-        let dx: f64 = self.x - other.x;
-        let dy = self.y - other.y;
-        let dz: f64 = self.z - other.z;
-        (dx * dx + dy * dy + dz * dz).sqrt()
+        (*self - *other).length()
     }
     
     pub fn midpoint(&self, other: &Vec3) -> Vec3 {
-        let mx: f64 = (self.x + other.x) / 2.0;
-        let my: f64 = (self.y + other.y) / 2.0;
-        let mz: f64 = (self.z + other.z) / 2.0;
-        Vec3::new(mx, my, mz)
+        self.lerp(other, 0.5)
+    }
+
+    pub fn lerp(&self, other: &Vec3, t: f64) -> Vec3 {
+        *self + (*other - *self) * t
     }
 
     pub fn cross(&self, other: &Vec3) -> Vec3 {
@@ -57,12 +55,16 @@ impl Vec3 {
         Vec3::new(x, y, z)
     }
 
+    pub fn cross_z(&self, other: &Vec3) -> f64 {
+        self.x * other.y - self.y * other.x
+    }
+
     pub fn normalize(&self) -> Vec3 {
-        let length = (self.x * self.x + self.y * self.y + self.z * self.z).sqrt();
+        let length = self.length();
         if length == 0.0 {
             Vec3::new(0.0, 0.0, 0.0)
         } else {
-            Vec3::new(self.x / length, self.y / length, self.z / length)
+            *self / length
         }
     }
 
@@ -71,7 +73,7 @@ impl Vec3 {
     }
 
     pub fn length_squared(&self) -> f64 {
-        self.x * self.x + self.y * self.y + self.z * self.z
+        self.dot(self)
     }
 
     pub fn length(&self) -> f64 {

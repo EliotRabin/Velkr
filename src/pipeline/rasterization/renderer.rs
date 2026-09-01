@@ -43,31 +43,31 @@ impl Renderer {
         }
     }
 
+    fn pixel_center(x: isize, y: isize) -> Vec3 {
+        Vec3::new(x as f64 + 0.5, y as f64 + 0.5, 0.0)
+    }
+
+    fn plot(framebuffer: &mut Framebuffer, point: &Vec3, color: Color) {
+        framebuffer.set_pixel(
+            point.x().round() as isize,
+            point.y().round() as isize,
+            point.z() as f32,
+            color,
+        );
+    }
+
     fn draw_line(&self, framebuffer: &mut Framebuffer, from: &Vec3, to: &Vec3, color: Color) {
-        let dx = to.x() - from.x();
-        let dy = to.y() - from.y();
-        let steps = dx.abs().max(dy.abs()).ceil() as usize;
+        let delta = *to - *from;
+        let steps = delta.x().abs().max(delta.y().abs()).ceil() as usize;
 
         if steps == 0 {
-            framebuffer.set_pixel(
-                from.x().round() as isize,
-                from.y().round() as isize,
-                from.z() as f32,
-                color,
-            );
+            Self::plot(framebuffer, from, color);
             return;
         }
 
-        let dz = to.z() - from.z();
-        let x_step = dx / steps as f64;
-        let y_step = dy / steps as f64;
-        let z_step = dz / steps as f64;
-
         for step in 0..=steps {
-            let x = from.x() + x_step * step as f64;
-            let y = from.y() + y_step * step as f64;
-            let z = from.z() + z_step * step as f64;
-            framebuffer.set_pixel(x.round() as isize, y.round() as isize, z as f32, color);
+            let point = from.lerp(to, step as f64 / steps as f64);
+            Self::plot(framebuffer, &point, color);
         }
     }
 
@@ -86,7 +86,7 @@ impl Renderer {
 
         for y in min_y..=max_y {
             for x in min_x..=max_x {
-                let p = Vec3::new(x as f64 + 0.5, y as f64 + 0.5, 0.0);
+                let p = Self::pixel_center(x, y);
 
                 if let Some((alpha, beta, gamma)) = triangle.barycentric(&p) {
                     fragment.interpolate_from(
