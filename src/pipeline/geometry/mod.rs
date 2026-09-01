@@ -4,7 +4,6 @@ pub mod camera;
 pub mod triangle;
 pub mod world;
 pub mod fragment;
-pub mod light;
 pub mod ray;
 pub mod hit;
 pub mod scene;

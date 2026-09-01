@@ -1,4 +1,4 @@
-﻿use crate::pipeline::math::vec3::Vec3;
+use crate::pipeline::math::vec3::Vec3;
 use crate::pipeline::screen::color::Color;
 
 #[derive(Debug, Clone, Copy, PartialEq)]

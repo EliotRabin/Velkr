@@ -188,6 +188,14 @@ impl Mesh {
         self
     }
 
+    pub fn with_reflectivity(mut self, reflectivity: f64) -> Self {
+        for vertex in self.vertices.iter_mut() {
+            vertex.set_attribut(Attribut::scalar(AttributKind::Reflectivity, reflectivity));
+        }
+
+        self
+    }
+
     pub fn vertices(&self) -> &Vec<Fragment> {
         &self.vertices
     }

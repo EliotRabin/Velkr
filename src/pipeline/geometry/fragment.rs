@@ -42,6 +42,7 @@ pub enum AttributKind {
     ScreenPosition,
     Normal,
     Color,
+    Reflectivity,
     Uv,
     Custom(&'static str),
 }

@@ -1,7 +1,4 @@
-use std::f64::consts::PI;
-
 use crate::pipeline::geometry::world::World;
-use crate::pipeline::math::vec3::Vec3;
 use crate::pipeline::raytracing::raytracer::Raytracer;
 use crate::pipeline::screen::color::Color;
 use crate::pipeline::screen::framebuffer::Framebuffer;
@@ -15,11 +12,11 @@ pub struct App<'a> {
 }
 
 impl<'a> App<'a> {
-    pub fn new(title: &str, width: usize, height: usize, world: World<'a>) -> Result<Self, minifb::Error> {
+    pub fn new(title: &str, width: usize, height: usize, world: World<'a>, raytracer: Raytracer) -> Result<Self, minifb::Error> {
         Ok(App {
             world,
             framebuffer: Framebuffer::new(width, height),
-            raytracer: Raytracer::new(),
+            raytracer,
             window: Window::new(title, width, height)?,
         })
     }
@@ -34,8 +31,6 @@ impl<'a> App<'a> {
 
     pub fn run(&mut self, clear_color: Color) -> Result<(), minifb::Error> {
         while self.window.is_open() {
-            self.update();
-
             self.framebuffer.clear(clear_color);
             self.raytracer.render(&self.world, &mut self.framebuffer);
 
@@ -43,12 +38,5 @@ impl<'a> App<'a> {
         }
 
         Ok(())
-    }
-
-    fn update(&mut self) {
-        let angle = PI / 360.0;
-        for model in self.world.models_mut() {
-            model.set_rotation(*model.rotation() + Vec3::new(angle / 2.0, angle, 0.0));
-        }
     }
 }

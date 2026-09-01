@@ -1,9 +1,9 @@
 use crate::pipeline::geometry::camera::Camera;
 use crate::pipeline::geometry::fragment::Fragment;
-use crate::pipeline::geometry::light::Light;
 use crate::pipeline::geometry::model::Model;
 use crate::pipeline::geometry::scene::Scene;
 use crate::pipeline::geometry::triangle::Triangle;
+use crate::pipeline::lighting::light::Light;
 
 pub struct World<'a> {
     scene: Scene<'a>,

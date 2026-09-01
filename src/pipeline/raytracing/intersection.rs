@@ -52,9 +52,15 @@ impl<'a> Intersection<'a> {
         self.triangle.interpolate(alpha, beta, gamma)
     }
 
-    pub fn surface(&self) -> Color {
+    pub fn albedo(&self) -> Color {
         self.fragment()
             .color(AttributKind::Color)
             .unwrap_or(Color::new(255, 255, 255))
+    }
+
+    pub fn reflectivity(&self) -> f64 {
+        self.fragment()
+            .scalar(AttributKind::Reflectivity)
+            .unwrap_or(0.0)
     }
 }
