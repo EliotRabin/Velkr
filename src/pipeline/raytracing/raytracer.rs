@@ -67,7 +67,13 @@ impl Raytracer {
     }
 
     fn shade(&self, intersection: &Intersection<'_>, triangles: &[Triangle<'_>], lights: &[&Light], depth: u32) -> Color {
-        let surface = Surface::new(intersection.point(), intersection.normal(), intersection.albedo());
+        let surface = Surface::new(
+            intersection.point(),
+            intersection.normal(),
+            intersection.view(),
+            intersection.albedo(),
+            intersection.shininess(),
+        );
 
         let mut color = Color::from_f64(0.0, 0.0, 0.0);
 

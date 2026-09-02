@@ -1,4 +1,5 @@
 ﻿use crate::pipeline::math::mat4::Mat4;
+use crate::pipeline::math::vec2::Vec2;
 use crate::pipeline::math::vec3::Vec3;
 use crate::pipeline::screen::color::Color;
 
@@ -9,6 +10,15 @@ pub trait Interpolable: Copy {
 impl Interpolable for f64 {
     fn interpolate(v0: f64, v1: f64, v2: f64, alpha: f64, beta: f64, gamma: f64) -> f64 {
         alpha * v0 + beta * v1 + gamma * v2
+    }
+}
+
+impl Interpolable for Vec2 {
+    fn interpolate(v0: Vec2, v1: Vec2, v2: Vec2, alpha: f64, beta: f64, gamma: f64) -> Vec2 {
+        Vec2::new(
+            f64::interpolate(v0.x(), v1.x(), v2.x(), alpha, beta, gamma),
+            f64::interpolate(v0.y(), v1.y(), v2.y(), alpha, beta, gamma),
+        )
     }
 }
 
@@ -43,6 +53,7 @@ pub enum AttributKind {
     Normal,
     Color,
     Reflectivity,
+    Shininess,
     Uv,
     Custom(&'static str),
 }
@@ -51,6 +62,7 @@ pub enum AttributKind {
 pub enum AttributValue {
     Scalar(f64),
     Vector(Vec3),
+    Uv(Vec2),
     Color(Color),
 }
 
@@ -65,6 +77,13 @@ impl AttributValue {
     pub fn as_vector(&self) -> Option<Vec3> {
         match self {
             AttributValue::Vector(vector) => Some(*vector),
+            _ => None,
+        }
+    }
+
+    pub fn as_uv(&self) -> Option<Vec2> {
+        match self {
+            AttributValue::Uv(uv) => Some(*uv),
             _ => None,
         }
     }
@@ -93,6 +112,9 @@ impl Interpolable for AttributValue {
             (AttributValue::Vector(w0), AttributValue::Vector(w1), AttributValue::Vector(w2)) => {
                 AttributValue::Vector(Vec3::interpolate(w0, w1, w2, alpha, beta, gamma))
             }
+            (AttributValue::Uv(t0), AttributValue::Uv(t1), AttributValue::Uv(t2)) => {
+                AttributValue::Uv(Vec2::interpolate(t0, t1, t2, alpha, beta, gamma))
+            }
             (AttributValue::Color(c0), AttributValue::Color(c1), AttributValue::Color(c2)) => {
                 AttributValue::Color(Color::interpolate(c0, c1, c2, alpha, beta, gamma))
             }
@@ -118,6 +140,10 @@ impl Attribut {
 
     pub fn vector(kind: AttributKind, vector: Vec3) -> Self {
         Attribut::new(kind, AttributValue::Vector(vector))
+    }
+
+    pub fn uv(kind: AttributKind, uv: Vec2) -> Self {
+        Attribut::new(kind, AttributValue::Uv(uv))
     }
 
     pub fn color(kind: AttributKind, color: Color) -> Self {
@@ -171,6 +197,13 @@ impl Fragment {
         Fragment::with_attributs(vec![Attribut::vector(AttributKind::Position, position)])
     }
 
+    pub fn from_position_uv(position: Vec3, uv: Vec2) -> Self {
+        Fragment::with_attributs(vec![
+            Attribut::vector(AttributKind::Position, position),
+            Attribut::uv(AttributKind::Uv, uv),
+        ])
+    }
+
     pub fn interpolate(
         v0: &Fragment,
         v1: &Fragment,
@@ -212,6 +245,10 @@ impl Fragment {
 
     pub fn vector(&self, kind: AttributKind) -> Option<Vec3> {
         self.attribut(kind)?.value().as_vector()
+    }
+
+    pub fn uv(&self, kind: AttributKind) -> Option<Vec2> {
+        self.attribut(kind)?.value().as_uv()
     }
 
     pub fn color(&self, kind: AttributKind) -> Option<Color> {

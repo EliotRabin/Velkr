@@ -2,6 +2,7 @@ use crate::pipeline::geometry::fragment::{AttributKind, Fragment};
 use crate::pipeline::geometry::hit::Hit;
 use crate::pipeline::geometry::ray::Ray;
 use crate::pipeline::geometry::triangle::Triangle;
+use crate::pipeline::math::vec2::Vec2;
 use crate::pipeline::math::vec3::Vec3;
 use crate::pipeline::screen::color::Color;
 
@@ -52,6 +53,12 @@ impl<'a> Intersection<'a> {
         self.triangle.interpolate(alpha, beta, gamma)
     }
 
+    pub fn uv(&self) -> Vec2 {
+        self.fragment()
+            .uv(AttributKind::Uv)
+            .unwrap_or(Vec2::new(0.0, 0.0))
+    }
+
     pub fn albedo(&self) -> Color {
         self.fragment()
             .color(AttributKind::Color)
@@ -62,5 +69,15 @@ impl<'a> Intersection<'a> {
         self.fragment()
             .scalar(AttributKind::Reflectivity)
             .unwrap_or(0.0)
+    }
+
+    pub fn shininess(&self) -> f64 {
+        self.fragment()
+            .scalar(AttributKind::Shininess)
+            .unwrap_or(0.0)
+    }
+
+    pub fn view(&self) -> Vec3 {
+        -self.ray.direction()
     }
 }

@@ -6,7 +6,7 @@ use crate::pipeline::geometry::mesh::Mesh;
 use crate::pipeline::geometry::model::Model;
 use crate::pipeline::geometry::scene::Scene;
 use crate::pipeline::geometry::world::World;
-use crate::pipeline::lighting::lambert::Lambert;
+use crate::pipeline::lighting::blinn_phong::BlinnPhong;
 use crate::pipeline::lighting::light::Light;
 use crate::pipeline::math::vec3::Vec3;
 use crate::pipeline::raytracing::raytracer::Raytracer;
@@ -19,11 +19,11 @@ const DEPTH: u32 = 3;
 
 fn main() {
     let meshes = build_meshes();
-    let ground = Mesh::plane(24.0).with_color(Color::new(190, 190, 190)).with_reflectivity(0.35);
+    let ground = Mesh::plane(24.0).with_color(Color::new(190, 190, 190)).with_reflectivity(0.0);
     let lights = build_lights();
     let world = build_world(&meshes, &ground, &lights);
 
-    let raytracer = Raytracer::new(DEPTH, Box::new(Lambert::new()));
+    let raytracer = Raytracer::new(DEPTH, Box::new(BlinnPhong::new()));
 
     let mut app = App::new("RustRayTracer", WIDTH, HEIGHT, world, raytracer).expect("fenêtre impossible à créer");
     app.run(Color::new(0, 0, 0)).expect("affichage impossible");
@@ -31,11 +31,11 @@ fn main() {
 
 fn build_meshes() -> Vec<Mesh> {
     vec![
-        Mesh::cube(1.0).with_color(Color::new(220, 70, 70)),
-        Mesh::sphere(1.0, 12).with_color(Color::new(70, 180, 220)).with_reflectivity(0.5),
+        Mesh::cube(1.0).with_color(Color::new(220, 70, 70)).with_shininess(16.0),
+        Mesh::sphere(1.0, 12).with_color(Color::new(70, 180, 220)).with_reflectivity(0.5).with_shininess(128.0),
         Mesh::pyramid(1.0, 1.4).with_color(Color::new(230, 200, 90)),
-        Mesh::cone(1.0, 1.4, 16).with_color(Color::new(120, 210, 120)),
-        Mesh::cylinder(1.0, 1.4, 16).with_color(Color::new(200, 130, 230)),
+        Mesh::cone(1.0, 1.4, 16).with_color(Color::new(120, 210, 120)).with_shininess(64.0),
+        Mesh::cylinder(1.0, 1.4, 16).with_color(Color::new(200, 130, 230)).with_shininess(8.0),
     ]
 }
 
